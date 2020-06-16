@@ -149,26 +149,28 @@ void makeJacobian2D( TH2 const & v, TMatrixD & Jac){
 
 
 void makeJacobian2Dfrom1D( int const n_x, int const n_y, TH1 const & v, TMatrixD & Jac){  
-  for ( unsigned int i = 0; i <=  n_x +1; ++i ){
-      for ( unsigned int j = 0; j <= n_y +1; ++j ) {          
+  //for ( unsigned int i = 0; i <=  n_x +1; ++i ){
+  for ( unsigned int i = 1; i <=  n_x; ++i ){
+      //for ( unsigned int j = 0; j <= n_y +1; ++j ) {
+      for ( unsigned int j = 1; j <= n_y; ++j ) {          
           // flattened index for v rows
-          auto counter = j * (n_x+2);
+          auto counter = (j-1)*(n_x);
           auto index_1 = counter + i;
-          auto N = v.Integral(counter, n_x+counter+1);
+          auto N = v.Integral(counter+1, counter+n_x);
           if ( N > 0.0 ){
-              for ( unsigned int k = 0; k <= n_x + 1; ++k ){
-                  for ( unsigned int l = 0; l <= n_y + 1; ++l ){
+              for ( unsigned int k = 1; k <= n_x; ++k ){
+                  for ( unsigned int l = 1; l <= n_y; ++l ){
                       // flattened index for v columns
-                      auto index_2 = l * (n_x + 2) + k; 
+                      auto index_2 = (l-1)*(n_x) + k;
 
                       // The entire matrix is block diagonal. 
 
                       // for diagonal elements within the blocks. 
                       if ( index_1 == index_2 )
-                        Jac[index_1][index_2] = (N - v.GetBinContent(i+counter)) / N / N;
+                        Jac[index_1][index_2] = (N - v.GetBinContent(index_1)) / N / N;
                       // for off-diagonal elements within the blocks. 
                       else if (l==j)
-                          Jac[index_1][index_2] = -v.GetBinContent(i+counter) / N / N;
+                          Jac[index_1][index_2] = -v.GetBinContent(index_1) / N / N;
                       //for off-diagonals outside of the blocks.
                       else
                         Jac[index_1][index_2] = 0;
